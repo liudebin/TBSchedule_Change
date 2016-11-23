@@ -1,0 +1,17 @@
+/build/
+/.idea
+.idea/
+.svn/
+target/
+bin/
+*.iml
+**/.iml
+*.epoch
+*.log
+*.log.zip
+**/*.lck
+.settings
+.project
+.classpath
+*.orig
+/target/
