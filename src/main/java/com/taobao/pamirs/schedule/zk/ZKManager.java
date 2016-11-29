@@ -64,7 +64,12 @@ public class ZKManager{
 		createZookeeper(connectionLatch);
 		connectionLatch.await(10,TimeUnit.SECONDS);
 	}
-	
+
+	/**
+	 * 创建一个zookeeper 链接
+	 * @param connectionLatch
+	 * @throws Exception
+	 */
 	private void createZookeeper(final CountDownLatch connectionLatch) throws Exception {
 		/**
 		 * 创建一个与服务器的连接

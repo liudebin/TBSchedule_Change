@@ -4,7 +4,7 @@
 <%@page import="com.taobao.pamirs.schedule.strategy.ScheduleStrategy"%>
 <%@ page contentType="text/html; charset=utf-8" %>
 <%
-Properties  p = ConsoleManager.loadConfig();
+Properties p = ConsoleManager.loadConfig();
 String error = request.getParameter("error");
 %>
 <html>

@@ -4,7 +4,7 @@
 <%
     String isManager= request.getParameter("manager");
 	String taskTypeName= request.getParameter("taskType");
-	ScheduleStrategy scheduleStrategy =  ConsoleManager.getScheduleStrategyManager().loadStrategy(taskTypeName);
+	ScheduleStrategy scheduleStrategy = ConsoleManager.getScheduleStrategyManager().loadStrategy(taskTypeName);
     boolean isNew = false;
     String actionName ="editScheduleStrategy";
     String editSts="";

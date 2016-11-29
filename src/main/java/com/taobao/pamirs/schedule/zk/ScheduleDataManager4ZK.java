@@ -42,6 +42,7 @@ import com.taobao.pamirs.schedule.taskmanager.ScheduleTaskTypeRunningInfo;
 
 /**
  * 负责实时维护调度时的ZK数据
+ * 任务和任务项的管理
  */
 public class ScheduleDataManager4ZK implements IScheduleDataManager {
 	private static transient Logger log = LoggerFactory.getLogger(ScheduleDataManager4ZK.class);
@@ -92,7 +93,9 @@ public class ScheduleDataManager4ZK implements IScheduleDataManager {
 		return this.zkManager.getZooKeeper();
 	}
 
-	//页面上创建任务时，会调用这个方法
+	/**
+	 * 创建任务节点，页面用到o.o
+ 	 */
 	public void createBaseTaskType(ScheduleTaskType baseTaskType) throws Exception {
 		if(baseTaskType.getBaseTaskType().indexOf("$") > 0){
 			throw new Exception("调度任务" + baseTaskType.getBaseTaskType() +"名称不能包括特殊字符 $");
@@ -106,6 +109,11 @@ public class ScheduleDataManager4ZK implements IScheduleDataManager {
 		}
 	}
 
+	/**
+	 * 页面上会有调用 o.o
+	 * @param baseTaskType
+	 * @throws Exception
+	 */
 	public void updateBaseTaskType(ScheduleTaskType baseTaskType)
 			throws Exception {
 		if(baseTaskType.getBaseTaskType().indexOf("$") > 0){
@@ -440,6 +448,12 @@ public class ScheduleDataManager4ZK implements IScheduleDataManager {
 		return result;
 	}
 
+	/**
+	 * 页面调用的清理的o.o
+	 * 运行期信息清理成功
+	 * @param baseTaskType
+	 * @throws Exception
+	 */
 	@Override
 	public void clearTaskType(String baseTaskType) throws Exception {
 		//清除所有的Runtime TaskType		
@@ -471,6 +485,11 @@ public class ScheduleDataManager4ZK implements IScheduleDataManager {
 		return result;
 	}
 
+	/**
+	 * 页面删除任务
+	 * @param baseTaskType
+	 * @throws Exception
+	 */
 	@Override
 	public void deleteTaskType(String baseTaskType) throws Exception {
 		ZKTools.deleteTree(this.getZooKeeper(),this.PATH_BaseTaskType + "/" + baseTaskType);
@@ -1123,7 +1142,12 @@ public class ScheduleDataManager4ZK implements IScheduleDataManager {
 	    	this.getZooKeeper().delete(zkPath, -1);
 		 }
 	}
-	
+
+	/**
+	 * 暂停任务的执行 0.0
+	 * @param baseTaskType
+	 * @throws Exception
+	 */
 	@Override
 	public void pauseAllServer(String baseTaskType) throws Exception {
 		ScheduleTaskType taskType = this.loadTaskTypeBaseInfo(baseTaskType);
@@ -1131,6 +1155,11 @@ public class ScheduleDataManager4ZK implements IScheduleDataManager {
 		this.updateBaseTaskType(taskType);
 	}
 
+	/**
+	 * 恢复任务的执行 0.0
+	 * @param baseTaskType
+	 * @throws Exception
+	 */
 	@Override
 	public void resumeAllServer(String baseTaskType) throws Exception {
 		ScheduleTaskType taskType = this.loadTaskTypeBaseInfo(baseTaskType);

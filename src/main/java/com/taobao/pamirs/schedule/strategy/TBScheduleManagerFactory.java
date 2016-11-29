@@ -9,6 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import com.sun.tools.internal.xjc.reader.relaxng.RELAXNGInternalizationLogic;
 import org.apache.zookeeper.ZooKeeper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -94,6 +95,7 @@ public class TBScheduleManagerFactory implements ApplicationContextAware {
 	}
 
 	/**
+	 * restart调用
 	 * 通过指定zkConfig，初始化实例
 	 * zkConfig 其实就是一个Properties文件的要保留的键值对,TBScheduleManagerFactory需要properties文件，就是为了配置Zookeeper的
 	 * @throws Exception
@@ -105,11 +107,18 @@ public class TBScheduleManagerFactory implements ApplicationContextAware {
 		}
 		this.init(properties);
 	}
-	
+
+	/**
+	 * 修改Zookeeper配置文件的时候，会调用这个方法，重新进行初始化，只有管理端会有此操作.
+	 *
+	 * @param p
+	 * @throws Exception
+	 */
 	public void reInit(Properties p) throws Exception{
 		if(this.start == true || this.timer != null || this.managerMap.size() >0){
 			throw new Exception("调度器有任务处理，不能重新初始化");
 		}
+		logger.info("重新初始化TBSdheduleManagerFactory");
 		this.init(p);
 	}
 
@@ -148,31 +157,35 @@ public class TBScheduleManagerFactory implements ApplicationContextAware {
      * @throws Exception
      */
 	public void initialData() throws Exception{
-			//初始化ZK的配置根路径信息，验证、设置根路径和版本号，
-			this.zkManager.initial();
-			//创建ScheduleDataManager4ZK对象，负责实时地维护调度时的ZK数据，
-//			创建baseTaskType节点 /{$rootPath}/baseTaskType
-			this.scheduleDataManager = new ScheduleDataManager4ZK(this.zkManager);
+		//初始化ZK的配置根路径信息，验证、设置根路径和版本号，
+		this.zkManager.initial();
+		//创建ScheduleDataManager4ZK对象，负责实时地维护调度时的ZK数据，
+//		创建baseTaskType节点 /{$rootPath}/baseTaskType
+		this.scheduleDataManager = new ScheduleDataManager4ZK(this.zkManager);
 //		创建ScheduleStategyDataManager4ZK对象，负责维护调度策略的ZK数据
-//			创建调度器的策略路径 = /{root}/strategy 持久性路径
-//			创建调度器的工厂路径 = /{root}/factory 持久性路径
-			this.scheduleStrategyManager = new ScheduleStrategyDataManager4ZK(this.zkManager);
-			if (this.start) {
-				// 注册调取器的管理工厂的对象节点，设置UUID，创建管理器工厂节点，过滤不可用调度策略等
-//				创建节点 /{root}/factory/工厂的uuid
-//				uuid = ip$hostname$UUID$sequential
-//				在所有能使用到的strategy下边创建相应工厂节点
-//					/{root}/strategy/策略名称/工厂的uuid
-				this.scheduleStrategyManager.registerManagerFactory(this);
-				if(timer == null){
-					timer = new Timer("TBScheduleManagerFactory-Timer");
-				}
-				if(timerTask == null){
-					timerTask = new ManagerFactoryTimerTask(this);
-//					每隔2秒循环执行timerTask
-					timer.schedule(timerTask, 2000,this.timerInterval);// task，延迟时间，间歇间隔
-				}
+//		创建调度器的策略路径 = /{root}/strategy 持久性路径
+//		创建调度器的工厂路径 = /{root}/factory 持久性路径
+		this.scheduleStrategyManager = new ScheduleStrategyDataManager4ZK(this.zkManager);
+//		如果是管理端的话，就不会做下边的操作
+//
+//		如：注册为工厂类啊，分配策略等等。
+
+		if (this.start) {
+			// 注册调取器的管理工厂的对象节点，设置UUID，创建管理器工厂节点，过滤不可用调度策略等
+//			创建节点 /{root}/factory/工厂的uuid
+//			uuid = ip$hostname$UUID$sequential
+//			在所有能使用到的strategy下边创建相应工厂节点
+//				/{root}/strategy/策略名称/工厂的uuid
+			this.scheduleStrategyManager.registerManagerFactory(this);
+			if(timer == null){
+				timer = new Timer("TBScheduleManagerFactory-Timer");
 			}
+			if(timerTask == null){
+				timerTask = new ManagerFactoryTimerTask(this);
+//				每隔2秒循环执行timerTask
+				timer.schedule(timerTask, 2000,this.timerInterval);// task，延迟时间，间歇间隔
+			}
+		}
 	}
 
 	/**
@@ -249,7 +262,7 @@ public class TBScheduleManagerFactory implements ApplicationContextAware {
 		}
 	}
 
-	//这才是重点
+	//这才是重点 o.o
 	public void reRegisterManagerFactory() throws Exception{
 //		没有注册工厂就注册工厂，注册过，就不操作。
 //		返回需要重新分配的策略（策略下有该工厂节点，但是策略不能分配给该工厂）
@@ -400,7 +413,7 @@ public class TBScheduleManagerFactory implements ApplicationContextAware {
 	public void stopAll() throws Exception {
 		try {
 			lock.lock();
-			this.start = false;
+			this.setStart(false);
 			if (this.initialThread != null) {
 				this.initialThread.stopThread();
 			}
@@ -473,7 +486,11 @@ public class TBScheduleManagerFactory implements ApplicationContextAware {
 		return applicationcontext.getBeanNamesForType(IScheduleTaskDeal.class);
 
 	}
-    
+
+	/**
+	 * 获取策略数据管理器，如果为空报异常
+	 * @return
+	 */
 	public IScheduleDataManager getScheduleDataManager() {
 		if(this.scheduleDataManager == null){
 			throw new RuntimeException(this.errorMessage);
@@ -581,7 +598,7 @@ class ManagerFactoryTimerTask extends java.util.TimerTask {
 class InitialThread extends Thread{
 	private static transient Logger log = LoggerFactory.getLogger(InitialThread.class);
 	TBScheduleManagerFactory facotry;
-	boolean isStop = false;
+	boolean isStop = false; //默认是false
 	public InitialThread(TBScheduleManagerFactory aFactory){
 		this.facotry = aFactory;
 	}

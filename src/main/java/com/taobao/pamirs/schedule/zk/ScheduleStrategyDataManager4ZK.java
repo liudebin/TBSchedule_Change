@@ -68,12 +68,17 @@ public class ScheduleStrategyDataManager4ZK{
 		ScheduleStrategy result = (ScheduleStrategy)this.gson.fromJson(valueString, ScheduleStrategy.class);
 		return result;
 	}
-	
+
+	/**
+	 * scheduleStrategyDeal.jsp 页面上创建策略时调用 o.o，会先创建策略
+	 * @param scheduleStrategy
+	 * @throws Exception
+	 */
 	public void createScheduleStrategy(ScheduleStrategy scheduleStrategy) throws Exception {
 		String zkPath =	this.PATH_Strategy + "/"+ scheduleStrategy.getStrategyName();
 		String valueString = this.gson.toJson(scheduleStrategy);
 		if ( this.getZooKeeper().exists(zkPath, false) == null) {
-			this.getZooKeeper().create(zkPath, valueString.getBytes(), this.zkManager.getAcl(),CreateMode.PERSISTENT);
+			this.getZooKeeper().create(zkPath, valueString.getBytes(), this.zkManager.getAcl(), CreateMode.PERSISTENT);
 		} else {
 			throw new Exception("调度策略" + scheduleStrategy.getStrategyName() + "已经存在,如果确认需要重建，请先调用deleteMachineStrategy(String taskType)删除");
 		}
@@ -93,11 +98,23 @@ public class ScheduleStrategyDataManager4ZK{
 	public void deleteMachineStrategy(String taskType) throws Exception {
 		deleteMachineStrategy(taskType,false);
 	}
+
+	/**
+	 * 暂停策略执行
+	 * @param strategyName
+	 * @throws Exception
+	 */
     public void pause(String strategyName) throws Exception{
     	ScheduleStrategy strategy = this.loadStrategy(strategyName);
     	strategy.setSts(ScheduleStrategy.STS_PAUSE);
     	this.updateScheduleStrategy(strategy);
 	}
+
+	/**
+	 * 回复策略执行
+	 * @param strategyName
+	 * @throws Exception
+	 */
 	public void resume(String strategyName) throws Exception{
     	ScheduleStrategy strategy = this.loadStrategy(strategyName);
     	strategy.setSts(ScheduleStrategy.STS_RESUME);
@@ -379,7 +396,13 @@ public class ScheduleStrategyDataManager4ZK{
 		String valueString = this.gson.toJson(result);	
 		this.getZooKeeper().setData(zkPath,valueString.getBytes(),-1);
 		}
-	
+
+	/**
+	 * 机器管理更新 页面 0.0
+	 * @param uuid
+	 * @param isStart
+	 * @throws Exception
+	 */
 	public void updateManagerFactoryInfo(String uuid,boolean isStart) throws Exception {
 		String zkPath = this.PATH_ManagerFactory + "/" + uuid;
 		if(this.getZooKeeper().exists(zkPath, false)==null){
