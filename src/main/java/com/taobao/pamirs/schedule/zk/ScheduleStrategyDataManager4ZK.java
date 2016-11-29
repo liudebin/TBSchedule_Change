@@ -412,7 +412,7 @@ public class ScheduleStrategyDataManager4ZK{
 	}
 
 	/**
-	 * 查询节点managefactory的节点data，返回新建的ManagerFactoryInfo 管理工厂信息
+	 * 查询节点managefactory的节点data，返回新建的ManagerFactoryInfo 管loadManagerFactoryInfo理工厂信息
 	 * 若是无值，设start为true
 	 * 有值保持
 	 * @param uuid

@@ -250,8 +250,7 @@ public class TBScheduleManagerFactory implements ApplicationContextAware {
 			} else if (stsInfo.isStart() == false) {
 //				加载工厂信息失败，停止所有调度任务，注销核心管理工厂
 				stopServer(null); // 停止所有的调度任务
-				this.getScheduleStrategyManager().unRregisterManagerFactory(
-						this);
+				this.getScheduleStrategyManager().unRregisterManagerFactory(this);
 			} else {
 //				第一次会走
 //				重新注册管理工厂
