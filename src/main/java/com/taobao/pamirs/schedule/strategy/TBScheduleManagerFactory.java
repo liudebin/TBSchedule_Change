@@ -9,7 +9,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import com.sun.tools.internal.xjc.reader.relaxng.RELAXNGInternalizationLogic;
 import org.apache.zookeeper.ZooKeeper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -169,7 +168,7 @@ public class TBScheduleManagerFactory implements ApplicationContextAware {
 //		如果是管理端的话，就不会做下边的操作
 //
 //		如：注册为工厂类啊，分配策略等等。
-
+		logger.info("{}---管理端", start ? "是" : "不是");
 		if (this.start) {
 			// 注册调取器的管理工厂的对象节点，设置UUID，创建管理器工厂节点，过滤不可用调度策略等
 //			创建节点 /{root}/factory/工厂的uuid
@@ -223,6 +222,7 @@ public class TBScheduleManagerFactory implements ApplicationContextAware {
 	public void refresh() throws Exception {
 //		refresh 跟 init 隔离
 //		同一线程也不会多次进入啊
+		logger.info("刷新管理工厂");
 		this.lock.lock();
 		try {
 			// 判断状态是否终止
@@ -290,7 +290,7 @@ public class TBScheduleManagerFactory implements ApplicationContextAware {
 			}
 
 			//如果是leader进行如下操作
-//			/{￥rootPath}/strategy/noPay24FrontTask-Strategy
+//			/{$rootPath}/strategy/noPay24FrontTask-Strategy
 			ScheduleStrategy scheduleStrategy =this.scheduleStrategyManager.loadStrategy(run.getStrategyName());
 			//分配每个工厂上的线程组数量
 			// 工厂个数、最大的线程组数
@@ -373,7 +373,7 @@ public class TBScheduleManagerFactory implements ApplicationContextAware {
 	}
 	
 	/**
-	 * 终止一类任务
+	 * 终止一类任务 o.o
 	 * 传入null，表示停止所有的任务调度
 	 * 
 	 * @throws Exception

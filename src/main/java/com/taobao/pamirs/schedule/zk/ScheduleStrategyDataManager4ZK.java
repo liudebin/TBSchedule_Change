@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * 调度策略的数据管理类
+ * 每个服务端分配的策略信息
  */
 public class ScheduleStrategyDataManager4ZK{
 	
@@ -229,8 +230,8 @@ public class ScheduleStrategyDataManager4ZK{
 	 * @throws Exception
 	 */
 	public void unRregisterManagerFactory(TBScheduleManagerFactory managerFactory) throws Exception{
-		for(String taskName:this.getZooKeeper().getChildren(this.PATH_Strategy,false)){
-			String zkPath =	this.PATH_Strategy+"/"+taskName+"/" + managerFactory.getUuid();
+		for(String strategy:this.getZooKeeper().getChildren(this.PATH_Strategy,false)){
+			String zkPath =	this.PATH_Strategy+"/"+strategy+"/" + managerFactory.getUuid();
 			if(this.getZooKeeper().exists(zkPath, false)!=null){
 				ZKTools.deleteTree(this.getZooKeeper(), zkPath);
 			}
@@ -246,12 +247,12 @@ public class ScheduleStrategyDataManager4ZK{
      *
 	 * strategyName就是策略的名字
 	 * @param strategyName
-	 * @param uuid
+	 * @param managerFactoryUUID
 	 * @return
 	 * @throws Exception
 	 */
-	public ScheduleStrategyRuntime loadScheduleStrategyRuntime(String strategyName, String uuid) throws Exception{
-		String zkPath =	this.PATH_Strategy +"/"+strategyName+"/"+uuid;
+	public ScheduleStrategyRuntime loadScheduleStrategyRuntime(String strategyName, String managerFactoryUUID) throws Exception{
+		String zkPath =	this.PATH_Strategy +"/"+strategyName+"/"+managerFactoryUUID;
 		ScheduleStrategyRuntime result = null;
 		if(this.getZooKeeper().exists(zkPath, false) !=null){
 			byte[] value = this.getZooKeeper().getData(zkPath,false,null);
@@ -272,7 +273,7 @@ public class ScheduleStrategyDataManager4ZK{
 //				第一次遍历会走这一步，因为之前只创建了节点，没有设值
 				result = new ScheduleStrategyRuntime();
 				result.setStrategyName(strategyName);
-				result.setUuid(uuid);
+				result.setUuid(managerFactoryUUID);
 				result.setRequestNum(0);
 				result.setMessage("");
 			}
@@ -351,7 +352,7 @@ public class ScheduleStrategyDataManager4ZK{
 	/**
 	 *
 	 * 各个策略下的工厂节点存的值就是策略名称，工厂UUID，最多能有的线程组数
-	 * 更新策略下工厂的数据-最多可以生成的线程组数量
+	 * 更新策略下工厂的数据-最多可以生成的线程组数量(即分配的线程组数)
 	 * @param strategyName
 	 * @param managerFactoryUUID
 	 * @param requestNum 要求的线程组数，可能用不了那么多
