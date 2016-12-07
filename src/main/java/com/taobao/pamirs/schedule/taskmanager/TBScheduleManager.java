@@ -62,7 +62,7 @@ abstract class TBScheduleManager implements IStrategyTask {
 	 */
 	protected ScheduleServer currenScheduleServer;
 	/**
-	 * 要分布执行的 任务类
+	 * 要分布执行的 任务类，真正要执行的任务类
 	 */
 	IScheduleTaskDeal  taskDealBean;
 	
@@ -145,7 +145,7 @@ abstract class TBScheduleManager implements IStrategyTask {
     				+ this.taskTypeInfo.getJudgeDeadInterval()
     				+ ",HeartBeatRate = " + this.taskTypeInfo.getHeartBeatRate());
     	}
-//    	 new ScheduleServer()，注入相关的信息，每个factory的一个任务就会有一个ScheduleServer
+//    	 new ScheduleServer()，注入相关的信息，每个factory的每个任务分配几个任务组数，就会有几个ScheduleServer
     	this.currenScheduleServer = ScheduleServer.createScheduleServer(
     	        this.scheduleCenter,
                 baseTaskType,
@@ -163,6 +163,7 @@ abstract class TBScheduleManager implements IStrategyTask {
 //		创建Timer定时器，定时向数据配置中心更新当前服务器的心跳信息
 //		如果发现本次更新的时间已经超时了，服务器死亡的心跳周期，则不能再向服务器更新信息
 //		而应该当做新的服务器，进行重新注册
+//		这儿才是分配任务项的地方，看完，然后把注释优化下
     	this.heartBeatTimer = new Timer(this.currenScheduleServer.getTaskType() +"-" + this.currentSerialNumber +"-HeartBeat");
     	this.heartBeatTimer.schedule(new HeartBeatTimerTask(this),
                 new java.util.Date(System.currentTimeMillis() + 500),
@@ -380,7 +381,7 @@ abstract class TBScheduleManager implements IStrategyTask {
 	}	
 	/**
 	 *
-	 * 再先看看
+	 * 再先看看 o.o processor 的作用
 	 * 当服务器停止的时候，调用此方法清除所有未处理任务，清除服务器的注册信息。
 	 * 也可能是控制中心发起的终止指令。
 	 * 需要注意的是，这个方法必须在当前任务处理完毕后才能执行
@@ -458,6 +459,7 @@ abstract class TBScheduleManager implements IStrategyTask {
 
 /**
  * 0.0
+ * 在这儿做任务项的分配，
  */
 class HeartBeatTimerTask extends java.util.TimerTask {
 	private static transient Logger log = LoggerFactory

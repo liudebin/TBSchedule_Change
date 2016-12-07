@@ -140,7 +140,7 @@ public class ScheduleDataManager4ZK implements IScheduleDataManager {
 	}
 
 	/**
-	 * 删除并重新创建 /{$rootPath}/baseTaskType/{$baseTaskType}/{$taskType}/item
+	 * 删除并重新创建 /{$rootPath}/baseTaskType/{$baseTaskType}/{$taskType}/taskItem
 	 * @param baseTaskType
 	 * @param ownSign
 	 * @param uuid
@@ -163,7 +163,7 @@ public class ScheduleDataManager4ZK implements IScheduleDataManager {
 					ZKTools.deleteTree(this.getZooKeeper(),zkPath);
 				}
 		 }
-		 //创建目录 /{$rootPath}/baseTaskType/{$baseTaskType}/{$taskType}/item
+		 //创建目录 /{$rootPath}/baseTaskType/{$baseTaskType}/{$taskType}/taskItem
 		 this.getZooKeeper().create(zkPath,null, this.zkManager.getAcl(),CreateMode.PERSISTENT);
 		 //创建任务的所有item节点问题
 		 this.createScheduleTaskItem(baseTaskType, ownSign,this.loadTaskTypeBaseInfo(baseTaskType).getTaskItems());

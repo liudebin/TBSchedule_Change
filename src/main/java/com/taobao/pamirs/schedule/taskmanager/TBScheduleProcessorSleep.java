@@ -53,7 +53,7 @@ class TBScheduleProcessorSleep<T> implements IScheduleProcessor,Runnable {
 	final Object lockVersionObject = new Object();
 	final Object lockRunningList = new Object();
 
-//	这个list是什么task，什么赋值的0.0
+//	这个list是job中查询到的业务数据，即真正的Job中的selectTask返回的数据0.0
 //	在 loadScheduleData，调用具体dealbean，即我们自己写的任务类，根据分配到的任务项，获取具体的数据。
 	protected List<T> taskList = new CopyOnWriteArrayList<T>();
 
