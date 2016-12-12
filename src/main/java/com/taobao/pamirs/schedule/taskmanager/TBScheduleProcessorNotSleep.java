@@ -167,7 +167,7 @@ class TBScheduleProcessorNotSleep<T> implements IScheduleProcessor, Runnable {
 		}
 	}
 	/**
-	 * 获取单个任务，注意lock是必须，
+	 * 获取多个任务，注意lock是必须，
 	 * 否则在maybeRepeatTaskList的数据处理上会出现冲突
 	 * @return
 	 */

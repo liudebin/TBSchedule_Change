@@ -37,7 +37,7 @@ class TBScheduleProcessorSleep<T> implements IScheduleProcessor,Runnable {
 	 */
 	protected TBScheduleManager scheduleManager;
 	/**
-	 * 任务类型
+	 * 任务类型 - 页面创建
 	 */
 	ScheduleTaskType taskTypeInfo;
 	
@@ -86,7 +86,7 @@ class TBScheduleProcessorSleep<T> implements IScheduleProcessor,Runnable {
 		this.taskTypeInfo = this.scheduleManager.getTaskTypeInfo();
 		this.taskDealBean = aTaskDealBean;
 		if (this.taskDealBean instanceof IScheduleTaskDealSingle<?>) {
-			if (taskTypeInfo.getExecuteNumber() > 1) {
+			if (taskTypeInfo.getExecuteNumber() > 1) { //每次执行的 数据 的数量
 				taskTypeInfo.setExecuteNumber(1);
 			}
 			isMutilTask = false;
@@ -96,7 +96,7 @@ class TBScheduleProcessorSleep<T> implements IScheduleProcessor,Runnable {
 		if (taskTypeInfo.getFetchDataNumber() < taskTypeInfo.getThreadNumber() * 10) {
 			logger.warn("参数设置不合理，系统性能不佳。【每次从数据库获取的数量fetchnum】 >= 【线程数量threadnum】 *【最少循环次数10】 ");
 		}
-//		在这是是要启动
+//		在这是要启动一定数量的处理线程，即 job single 不应该就只有一个吗 o.o
 		for (int i = 0; i < taskTypeInfo.getThreadNumber(); i++) {
 			this.startThread(i);
 		}
@@ -253,7 +253,7 @@ class TBScheduleProcessorSleep<T> implements IScheduleProcessor,Runnable {
 					}
 
 					//加载调度任务
-					if(this.isMutilTask == false){
+					if(this.isMutilTask == false){ //不能批量处理
 						executeTask = this.getScheduleTask();
 					}else{
 						executeTask = this.getScheduleTaskIdMulti();

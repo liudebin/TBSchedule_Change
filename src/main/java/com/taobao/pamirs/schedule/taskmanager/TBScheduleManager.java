@@ -354,8 +354,9 @@ abstract class TBScheduleManager implements IStrategyTask {
 		}
 	}
 	/**
-	 * 重新执行
-	 * 处在了可执行的时间区间，恢复运行
+	 * 重新执行 - 实现的job的执行入口
+	 *
+	 * 处在了可执行的时间区间，重新运行
 	 * 在此生成并设置 processor
 	 * @throws Exception 
 	 */
