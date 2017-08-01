@@ -1,14 +1,13 @@
 package com.taobao.pamirs.schedule.taskmanager;
 
-import java.util.List;
-import java.util.Map;
-
+import com.taobao.pamirs.schedule.TaskItemDefine;
+import com.taobao.pamirs.schedule.strategy.TBScheduleManagerFactory;
 import org.apache.zookeeper.data.Stat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.taobao.pamirs.schedule.TaskItemDefine;
-import com.taobao.pamirs.schedule.strategy.TBScheduleManagerFactory;
+import java.util.List;
+import java.util.Map;
 
 public class TBScheduleManagerStatic extends TBScheduleManager {
 	private static transient Logger log = LoggerFactory.getLogger(TBScheduleManagerStatic.class);
@@ -166,7 +165,7 @@ public class TBScheduleManagerStatic extends TBScheduleManager {
 	}
 	
 	/**判断某个任务对应的线程组是否处于僵尸状态。
-	 * true 表示有线程组处于僵尸状态。需要告警。并没有告警
+	 * true 表示有线程组处于僵尸状态。需要告警。 error就是告警
 	 * @param type
 	 * @param statMap
 	 * @return

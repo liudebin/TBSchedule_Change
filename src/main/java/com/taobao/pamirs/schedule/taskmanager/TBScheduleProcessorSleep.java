@@ -1,21 +1,23 @@
 package com.taobao.pamirs.schedule.taskmanager;
 
+import com.taobao.pamirs.schedule.IScheduleTaskDeal;
+import com.taobao.pamirs.schedule.IScheduleTaskDealMulti;
+import com.taobao.pamirs.schedule.IScheduleTaskDealSingle;
+import com.taobao.pamirs.schedule.TaskItemDefine;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.lang.reflect.Array;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.taobao.pamirs.schedule.IScheduleTaskDeal;
-import com.taobao.pamirs.schedule.IScheduleTaskDealMulti;
-import com.taobao.pamirs.schedule.IScheduleTaskDealSingle;
-import com.taobao.pamirs.schedule.TaskItemDefine;
-
 /**
  * 任务调度器，在TBScheduleManager的管理下实现多线程数据处理
+ *
+ *
+ * tbSchedule 如果任务不执行完成不会开始下一次。一次执行结束，要休眠设置的时间之后，再执行
  * @author xuannan
  *
  * @param <T>
@@ -72,7 +74,8 @@ class TBScheduleProcessorSleep<T> implements IScheduleProcessor,Runnable {
 
 	/**
 	 * 创建一个调度处理器，并执行
-	 * 根据任务页面配置的线程数，启动n个线程，若继承的是single 就只启动一个
+	 * 根据任务页面配置的线程数，启动n个线程，
+	 * single 只是说明 每次追处理一个查询到的数据
 	 *
 	 * @param aManager
 	 * @param aTaskDealBean
@@ -178,18 +181,19 @@ class TBScheduleProcessorSleep<T> implements IScheduleProcessor,Runnable {
 		try {
 //           在每次数据处理完毕后休眠固定的时间
 //			是一批数据，一批又多少呢？ 0.0
-			if (this.taskTypeInfo.getSleepTimeInterval() > 0) {
-				if(logger.isTraceEnabled()){
-					logger.trace("处理完一批数据后休眠：" + this.taskTypeInfo.getSleepTimeInterval());
-				}
-				this.isSleeping = true;
-			    Thread.sleep(taskTypeInfo.getSleepTimeInterval());
-			    this.isSleeping = false;
-			    
-				if(logger.isTraceEnabled()){
-					logger.trace("处理完一批数据后休眠后恢复");
-				}
-			}
+			this.taskTypeInfo.sleepTimeInterval(this);
+//			if (this.taskTypeInfo.getSleepTimeInterval() > 0) {
+//				if(logger.isTraceEnabled()){
+//					logger.trace("处理完一批数据后休眠：" + this.taskTypeInfo.getSleepTimeInterval());
+//				}
+//				this.isSleeping = true;
+//			    Thread.sleep(taskTypeInfo.getSleepTimeInterval());
+//			    this.isSleeping = false;
+//
+//				if(logger.isTraceEnabled()){
+//					logger.trace("处理完一批数据后休眠后恢复");
+//				}
+//			}
 			
 			List<TaskItemDefine> taskItems = this.scheduleManager.getCurrentScheduleTaskItemList();
 			// 根据队列信息查询需要调度的数据，然后增加到任务列表中

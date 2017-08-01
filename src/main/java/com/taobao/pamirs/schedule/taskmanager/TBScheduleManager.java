@@ -1,5 +1,14 @@
 package com.taobao.pamirs.schedule.taskmanager;
 
+import com.taobao.pamirs.schedule.CronExpression;
+import com.taobao.pamirs.schedule.IScheduleTaskDeal;
+import com.taobao.pamirs.schedule.ScheduleUtil;
+import com.taobao.pamirs.schedule.TaskItemDefine;
+import com.taobao.pamirs.schedule.strategy.IStrategyTask;
+import com.taobao.pamirs.schedule.strategy.TBScheduleManagerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.Date;
 import java.util.List;
 import java.util.Timer;
@@ -7,16 +16,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.taobao.pamirs.schedule.CronExpression;
-import com.taobao.pamirs.schedule.IScheduleTaskDeal;
-import com.taobao.pamirs.schedule.ScheduleUtil;
-import com.taobao.pamirs.schedule.TaskItemDefine;
-import com.taobao.pamirs.schedule.strategy.IStrategyTask;
-import com.taobao.pamirs.schedule.strategy.TBScheduleManagerFactory;
 
 
 
@@ -72,7 +71,7 @@ abstract class TBScheduleManager implements IStrategyTask {
 	IScheduleProcessor processor; //resume 方法中 创建。
     StatisticsInfo statisticsInfo = new StatisticsInfo();
     
-    boolean isPauseSchedule = true;
+    boolean isPauseSchedule = true; // 起什么作用 ？ 0.0
     String pauseMessage="";
     /**
      *  当前处理任务队列清单
@@ -253,6 +252,7 @@ abstract class TBScheduleManager implements IStrategyTask {
 
 
 	/**
+	 * 任务第一次执行的时刻
 	 * 如果设置了 crontab表达式，则计算时间是否合适，通过 PauseOrResumeScheduleTask 计算下次运行或结束时间
 	 * 如果没有设置，则直接运行。
 	 * @throws Exception
@@ -337,7 +337,7 @@ abstract class TBScheduleManager implements IStrategyTask {
 		}
 	}	
 	/**
-	 * 超过运行的运行时间，暂时停止调度
+	 * 超过运行的运行时间，暂时停止调度  是不是这儿起的作用，任务执行的时候，不再从新发起调度
 	 * @throws Exception 
 	 */
 	public void pause(String message) throws Exception{
@@ -356,12 +356,12 @@ abstract class TBScheduleManager implements IStrategyTask {
 	/**
 	 * 重新执行 - 实现的job的执行入口
 	 *
-	 * 处在了可执行的时间区间，重新运行
+	 * 处在了可执行的时间区间，重新运行，这个可执行的时间区间是哪个？ 0.0
 	 * 在此生成并设置 processor
 	 * @throws Exception 
 	 */
 	public void resume(String message) throws Exception{
-		if (this.isPauseSchedule == true) {
+		if (this.isPauseSchedule == true) { //什么是假改成 false
 			if(log.isDebugEnabled()){
 				log.debug("恢复调度:" + this.currenScheduleServer.getUuid());
 			}
@@ -486,6 +486,7 @@ class HeartBeatTimerTask extends java.util.TimerTask {
  * 确认scheduleServer下次执行时间，并设置。
  * 之后会重新创建一个 PauseOrResumeScheduleTask 对象，重复进行相应的工作。
  *
+ * 每次到执行时间就会启动一个新的任务？不管之前是否执行中？  o.o
  */
 class PauseOrResumeScheduleTask extends java.util.TimerTask {
 	private static transient Logger log = LoggerFactory

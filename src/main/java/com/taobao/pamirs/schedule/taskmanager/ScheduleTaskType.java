@@ -1,9 +1,11 @@
 package com.taobao.pamirs.schedule.taskmanager;
 
+import org.apache.commons.lang.builder.ToStringBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.ArrayList;
 import java.util.List;
-
-import org.apache.commons.lang.builder.ToStringBuilder;
 
 /**
  * 调度任务类型
@@ -14,7 +16,7 @@ import org.apache.commons.lang.builder.ToStringBuilder;
  *
  */
 public class ScheduleTaskType implements java.io.Serializable {
-	
+	private static transient Logger logger = LoggerFactory.getLogger(ScheduleTaskType.class);
 	/**
 	 * 
 	 */
@@ -326,5 +328,23 @@ public class ScheduleTaskType implements java.io.Serializable {
 		for(int i = 0; i < str.length; i ++) {
 			System.out.println(str[i]);
 		}
+	}
+
+//	void  SleepTimeInterval((T)IScheduleProcessor  tbScheduleProcessorSleep) {
+	void sleepTimeInterval(TBScheduleProcessorSleep tbScheduleProcessorSleep) throws InterruptedException {
+		// 在每次数据处理完毕后休眠固定的时间
+			if (this.getSleepTimeInterval() > 0) {
+				if (logger.isTraceEnabled()) {
+					logger.trace("处理完一批数据后休眠："
+							+ this.getSleepTimeInterval());
+				}
+				tbScheduleProcessorSleep.isSleeping = true;
+				Thread.sleep(this.getSleepTimeInterval());
+				tbScheduleProcessorSleep.isSleeping = false;
+
+				if (logger.isTraceEnabled()) {
+					logger.trace("处理完一批数据后休眠后恢复");
+				}
+			}
 	}
 }
